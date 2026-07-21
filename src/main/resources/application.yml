@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: report-service
+
+  # ========== НАСТРОЙКИ БАЗЫ ДАННЫХ ==========
+  datasource:
+    url: jdbc:postgresql://localhost:5432/report_db
+    username: postgres
+    password: 1056
+    driver-class-name: org.postgresql.Driver
+
+  # ========== НАСТРОЙКИ JPA (HIBERNATE) ==========
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  # ========== НАСТРОЙКИ FEIGNCLIENT ==========
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+    compatibility-verifier:
+      enabled: false
+
+  # ========== НАСТРОЙКИ KAFKA ==========
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: report:com.example.reportservice.event.ReportGeneratedEvent
+    consumer:
+      group-id: report-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: report:com.example.reportservice.event.ReportGeneratedEvent
+
+# ========== НАСТРОЙКИ FEIGN (CIRCUIT BREAKER) ==========
+feign:
+  circuitbreaker:
+    enabled: true
+
+# ========== НАСТРОЙКИ СЕРВЕРА ==========
+server:
+  port: 8082
+
+# ========== НАСТРОЙКИ ЛОГИРОВАНИЯ ==========
+logging:
+  level:
+    com.example.reportservice: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.example.reportservice.client: DEBUG
